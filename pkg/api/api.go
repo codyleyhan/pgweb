@@ -424,7 +424,14 @@ func HandleQuery(query string, c *gin.Context) {
 	filename := getQueryParam(c, "filename")
 
 	if filename == "" {
-		filename = fmt.Sprintf("pgweb-%v.%v", time.Now().Unix(), format)
+		info, err := DB(c).Info()
+		if err != nil {
+			c.JSON(400, Error{err.Error()})
+			return
+		}
+
+		formattedInfo := info.Format()[0]
+		filename = fmt.Sprintf("%v-query-%v.%v", formattedInfo["current_database"], time.Now().Unix(), format)
 	}
 
 	if format != "" {
